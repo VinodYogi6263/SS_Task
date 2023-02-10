@@ -12,6 +12,4 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
 
 	public Optional<Book> getByBookIdAndBookname(Integer bookid, String bookname);
 
-	public boolean existsById(List<Integer> bookId);
-
 }

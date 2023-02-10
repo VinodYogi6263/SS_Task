@@ -10,6 +10,4 @@ import com.ss.entity.Project;
 @Repository
 public interface ProjectRepository extends JpaRepository<Project,Integer> {
 
-	boolean existsById(List<Integer> projectId);
-
 }

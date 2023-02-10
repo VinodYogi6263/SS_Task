@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import lombok.Data;
@@ -25,6 +26,12 @@ public class UserRequest {
 	@NotBlank(message = "userstatus shouldn't be Blank")
 	@NotNull(message = "userstatus shouldn't be null")
 	private String userStauts;
+
+	@NotNull(message = "projectId shouldn't be null")
+	@NotEmpty(message = "projectId Not Empty")
 	private List<Integer> projectId;
+
+	@NotNull(message = "bookId shouldn't be null")
+	@NotEmpty(message = "bookId Not Empty")
 	private List<Integer> bookId;
 }

@@ -2,9 +2,12 @@ package com.ss.service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Stream;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,18 +44,28 @@ public class UserServiceImpl implements UserService {
 	public ResponseEntity<GeneralResponse> save(UserRequest userRequest) {
 
 		try {
-			if (!projectRepository.existsById(userRequest.getProjectId()))
-				return new ResponseEntity<GeneralResponse>(new GeneralResponse(null, Message.idNotFound, 404),
-						HttpStatus.NOT_FOUND);
-			if (!bookRepository.existsById(userRequest.getBookId()))
-				return new ResponseEntity<GeneralResponse>(new GeneralResponse(null, Message.idNotFound, 404),
-						HttpStatus.NOT_FOUND);
+			for (Integer bookId : userRequest.getBookId()) {
+				if (!bookRepository.existsById(bookId))
+					return new ResponseEntity<GeneralResponse>(
+							new GeneralResponse(null, Message.bookIdNotFound + " " + bookId, 404),
+							HttpStatus.NOT_FOUND);
+
+			}
+			for (Integer projectId : userRequest.getProjectId()) {
+				if (!projectRepository.existsById(projectId))
+					return new ResponseEntity<GeneralResponse>(
+							new GeneralResponse(null, Message.projectIdNotFound + " " + projectId, 404),
+							HttpStatus.NOT_FOUND);
+
+			}
+
 			List<Project> projectList = projectRepository.findAllById(userRequest.getProjectId());
 
 			List<Book> bookList = bookRepository.findAllById(userRequest.getBookId());
 			LocalDateTime current = LocalDateTime.now();
 			User user = new User(userRequest.getUserName(), userRequest.getUserEmail(), userRequest.getUserPassword(),
 					userRequest.getUserStauts(), current, bookList, projectList);
+			user.setUserId(0);
 			user = userRepository.save(user);
 			log.info(Message.save);
 			return new ResponseEntity<GeneralResponse>(new GeneralResponse(user, Message.save, 200), HttpStatus.OK);

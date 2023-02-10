@@ -76,7 +76,7 @@ public class BookServiceImpl implements BookService {
 
 		try {
 			if (!userRepository.existsById(Integer.parseInt(bookRequest.getUserId()))) {
-				return new ResponseEntity<GeneralResponse>(new GeneralResponse(null, Message.idNotFound, 200),
+				return new ResponseEntity<GeneralResponse>(new GeneralResponse(null, Message.userIdNotFound, 200),
 						HttpStatus.NOT_FOUND);
 			}
 			User user = userRepository.findById(Integer.parseInt(bookRequest.getUserId())).get();
