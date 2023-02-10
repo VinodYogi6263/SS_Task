@@ -1,5 +1,6 @@
 package com.ss.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,5 +11,7 @@ import com.ss.entity.Book;
 public interface BookRepository extends JpaRepository<Book, Integer> {
 
 	public Optional<Book> getByBookIdAndBookname(Integer bookid, String bookname);
+
+	public boolean existsById(List<Integer> bookId);
 
 }

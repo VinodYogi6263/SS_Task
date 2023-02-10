@@ -24,23 +24,22 @@ public class ProjectServiceImpl implements ProjectService {
 	@Autowired
 	UserRepository userRepository;
 
-	Logger log = LoggerFactory.getLogger(ProjectServiceImpl.class);
+	private final Logger log = LoggerFactory.getLogger(ProjectServiceImpl.class);
 
 	public ResponseEntity<GeneralResponse> save(ProjectRequest projectRequest) {
 
-		Project save = null;
-
 		try {
-			List<User> user = userRepository.findAllById(projectRequest.getUserId());
-			Project project = new Project(projectRequest.getProjectName(), projectRequest.getProjectManager(), user);
-			save = projectRepository.save(project);
+			List<User> userList = userRepository.findAllById(projectRequest.getUserId());
+			Project project = new Project(projectRequest.getProjectName(), projectRequest.getProjectManager(),
+					userList);
+			project = projectRepository.save(project);
 			log.info(Message.save);
-			return new ResponseEntity<GeneralResponse>(new GeneralResponse(save, Message.save, 200), HttpStatus.OK);
+			return new ResponseEntity<GeneralResponse>(new GeneralResponse(project, Message.save, 200), HttpStatus.OK);
 		}
 
 		catch (Exception e) {
 			log.error(e.getMessage());
-			return new ResponseEntity<GeneralResponse>(new GeneralResponse(save, Message.notSave, 500),
+			return new ResponseEntity<GeneralResponse>(new GeneralResponse(null, Message.notSave, 500),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
@@ -48,14 +47,14 @@ public class ProjectServiceImpl implements ProjectService {
 
 	@Override
 	public ResponseEntity<GeneralResponse> findAll() {
-		List<Project> findAll = null;
+
 		try {
-			findAll = projectRepository.findAll();
+			List<Project> projectList = projectRepository.findAll();
 			log.info(Message.found);
-			return ResponseEntity.of(Optional.of(new GeneralResponse(findAll, Message.found, 200)));
+			return ResponseEntity.of(Optional.of(new GeneralResponse(projectList, Message.found, 200)));
 		} catch (Exception e) {
 			log.error(e.getMessage());
-			return new ResponseEntity<GeneralResponse>(new GeneralResponse(findAll, Message.notfound, 404),
+			return new ResponseEntity<GeneralResponse>(new GeneralResponse(null, Message.notfound, 404),
 					HttpStatus.NOT_FOUND);
 		}
 	}

@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 @Table(name = "User_Details")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class,property = "userId")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "userId")
 public class User {
 	@Id
 	@Column(name = "UserId")
@@ -35,7 +35,7 @@ public class User {
 	private LocalDateTime userUpdated_at;
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<Book> book = new ArrayList<>();
-	@ManyToMany(cascade = CascadeType.ALL,targetEntity = Project.class,fetch = FetchType.EAGER)
+	@ManyToMany(cascade = CascadeType.ALL, targetEntity = Project.class, fetch = FetchType.EAGER)
 	private List<Project> project;
 
 	public User(String userName, String userEmail, String userPassword, String userStauts, LocalDateTime userCreated_at,
@@ -63,16 +63,15 @@ public class User {
 		this.book = book;
 		this.userId = userId;
 	}
+
 	public User(int userId, String userName, String userEmail, String userPassword, String userStauts,
-			LocalDateTime userCreated_at, LocalDateTime userUpdated_at) {
+			LocalDateTime userUpdated_at) {
 		super();
 		this.userName = userName;
 		this.userEmail = userEmail;
 		this.userPassword = userPassword;
 		this.userStauts = userStauts;
 		this.userUpdated_at = userUpdated_at;
-		this.userCreated_at = userCreated_at;
-		this.book = book;
 		this.userId = userId;
 	}
 

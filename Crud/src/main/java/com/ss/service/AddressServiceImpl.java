@@ -20,20 +20,20 @@ public class AddressServiceImpl implements AddressService {
 	@Autowired
 	AddressRepository addressRepository;
 
-	Logger log = LoggerFactory.getLogger(AddressServiceImpl.class);
+	private final Logger log = LoggerFactory.getLogger(AddressServiceImpl.class);
 
 	@Override
 	public ResponseEntity<GeneralResponse> find() {
 
-		List<Address> findAll = null;
+		List<Address> addressList = null;
 
 		try {
-			findAll = addressRepository.findAll();
+			addressList = addressRepository.findAll();
 			log.info(Message.found);
-			return ResponseEntity.of(Optional.of(new GeneralResponse(findAll, Message.found, 200)));
+			return ResponseEntity.of(Optional.of(new GeneralResponse(addressList, Message.found, 200)));
 		} catch (Exception e) {
 			log.error(e.getMessage());
-			return new ResponseEntity<GeneralResponse>(new GeneralResponse(findAll, Message.notfound, 404),
+			return new ResponseEntity<GeneralResponse>(new GeneralResponse(addressList, Message.notfound, 404),
 					HttpStatus.NOT_FOUND);
 		}
 
@@ -41,17 +41,18 @@ public class AddressServiceImpl implements AddressService {
 
 	@Override
 	public ResponseEntity<GeneralResponse> save(AddressRequest addressRequest) {
-		Address save = null;
+		Address address = null;
 		try {
-			save = addressRepository.save(new Address(addressRequest.getCity(), addressRequest.getState(),
+			address = addressRepository.save(new Address(addressRequest.getCity(), addressRequest.getState(),
 					addressRequest.getZipCode(), addressRequest.getCountry(), addressRequest.getAddressBlock()));
 			log.info(Message.save);
-			return new ResponseEntity<GeneralResponse>(new GeneralResponse(save, Message.save, 200), HttpStatus.OK);
+			return new ResponseEntity<GeneralResponse>(new GeneralResponse(address, Message.save, 200), HttpStatus.OK);
 
 		} catch (Exception e) {
 			log.error(e.getMessage());
-			return new ResponseEntity<GeneralResponse>(new GeneralResponse(save, Message.notSave, 500),
+			return new ResponseEntity<GeneralResponse>(new GeneralResponse(address, Message.notSave, 500),
 					HttpStatus.INTERNAL_SERVER_ERROR);
+
 		}
 
 	}

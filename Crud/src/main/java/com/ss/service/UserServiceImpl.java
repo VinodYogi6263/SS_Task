@@ -35,28 +35,32 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	ProjectRepository projectRepository;
 
-	Logger log = LoggerFactory.getLogger(ProjectServiceImpl.class);
+	private final Logger log = LoggerFactory.getLogger(ProjectServiceImpl.class);
 
 	@Override
 	public ResponseEntity<GeneralResponse> save(UserRequest userRequest) {
 
-		LocalDateTime current = LocalDateTime.now();
-
-		User save = null;
 		try {
+			if (!projectRepository.existsById(userRequest.getProjectId()))
+				return new ResponseEntity<GeneralResponse>(new GeneralResponse(null, Message.idNotFound, 404),
+						HttpStatus.NOT_FOUND);
+			if (!bookRepository.existsById(userRequest.getBookId()))
+				return new ResponseEntity<GeneralResponse>(new GeneralResponse(null, Message.idNotFound, 404),
+						HttpStatus.NOT_FOUND);
+			List<Project> projectList = projectRepository.findAllById(userRequest.getProjectId());
 
-			List<Project> project = projectRepository.findAllById(userRequest.getProjectId());
-			List<Book> book = bookRepository.findAllById(userRequest.getBookId());
+			List<Book> bookList = bookRepository.findAllById(userRequest.getBookId());
+			LocalDateTime current = LocalDateTime.now();
 			User user = new User(userRequest.getUserName(), userRequest.getUserEmail(), userRequest.getUserPassword(),
-					userRequest.getUserStauts(), current, book, project);
-			save = userRepository.save(user);
+					userRequest.getUserStauts(), current, bookList, projectList);
+			user = userRepository.save(user);
 			log.info(Message.save);
-			return new ResponseEntity<GeneralResponse>(new GeneralResponse(save, Message.save, 200), HttpStatus.OK);
+			return new ResponseEntity<GeneralResponse>(new GeneralResponse(user, Message.save, 200), HttpStatus.OK);
 		}
 
 		catch (Exception e) {
 			log.error(e.getMessage());
-			return new ResponseEntity<GeneralResponse>(new GeneralResponse(save, Message.notSave, 500),
+			return new ResponseEntity<GeneralResponse>(new GeneralResponse(null, Message.notSave, 500),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
@@ -84,40 +88,38 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public ResponseEntity<GeneralResponse> findById(Integer userID) {
-		User user = null;
+
 		try {
 
 			Optional<User> findById = userRepository.findById(userID);
-			user = findById.get();
+			User user = findById.get();
 			log.info(Message.found);
 			return new ResponseEntity<GeneralResponse>(new GeneralResponse(user, Message.found, 200), HttpStatus.OK);
 
 		} catch (Exception e) {
 
 			log.error(e.getMessage());
-			return new ResponseEntity<GeneralResponse>(new GeneralResponse(user, Message.idNotFound, 404),
+			return new ResponseEntity<GeneralResponse>(new GeneralResponse(null, Message.idNotFound, 404),
 					HttpStatus.NOT_FOUND);
 		}
 
 	}
 
 	public ResponseEntity<GeneralResponse> update(UserRequest userRequest) {
-		User save = null;
-		LocalDateTime current = LocalDateTime.now();
+
 		try {
 
-			Optional<User> findById = userRepository.findById(userRequest.getUserId());
+			LocalDateTime current = LocalDateTime.now();
 			User user = new User(userRequest.getUserId(), userRequest.getUserName(), userRequest.getUserEmail(),
-					userRequest.getUserPassword(), userRequest.getUserStauts(), findById.get().getUserCreated_at(),
-					current);
+					userRequest.getUserPassword(), userRequest.getUserStauts(), current);
 
-			save = userRepository.save(user);
+			user = userRepository.save(user);
 			log.info(Message.update);
-			return new ResponseEntity<GeneralResponse>(new GeneralResponse(save, Message.update, 200), HttpStatus.OK);
+			return new ResponseEntity<GeneralResponse>(new GeneralResponse(user, Message.update, 200), HttpStatus.OK);
 
 		} catch (Exception e) {
 			log.error(e.getMessage());
-			return new ResponseEntity<GeneralResponse>(new GeneralResponse(save, Message.notSave, 500),
+			return new ResponseEntity<GeneralResponse>(new GeneralResponse(null, Message.notSave, 500),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
@@ -145,12 +147,12 @@ public class UserServiceImpl implements UserService {
 					Integer.parseInt(paginationRequest.getPageSize()), Sort.by(paginationRequest.getSortBy()));
 			Page<User> pageUser = userRepository.findByuserNameOruserEmail(paginationRequest.getSearch(),
 					paginationRequest.getSearch(), p);
-			List<User> searching = pageUser.getContent();
+			List<User> userList = pageUser.getContent();
 			PaginationResponse paginationResponse = new PaginationResponse(pageUser.getNumber(), pageUser.getSize(),
 					pageUser.getTotalPages(), pageUser.getTotalElements(), pageUser.isLast(), pageUser.isFirst());
 			log.info(Message.found);
 			return ResponseEntity
-					.of(Optional.of(new GeneralResponse(searching, Message.found, 200, paginationResponse)));
+					.of(Optional.of(new GeneralResponse(userList, Message.found, 200, paginationResponse)));
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			return new ResponseEntity<GeneralResponse>(new GeneralResponse(null, Message.notfound, 404),
