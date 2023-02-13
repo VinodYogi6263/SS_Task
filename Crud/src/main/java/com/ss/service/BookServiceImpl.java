@@ -33,21 +33,20 @@ public class BookServiceImpl implements BookService {
 	@Autowired
 	UserRepository userRepository;
 
-	Logger log = LoggerFactory.getLogger(BookServiceImpl.class);
+	private final Logger log = LoggerFactory.getLogger(BookServiceImpl.class);
 
 	@Override
 	public ResponseEntity<GeneralResponse> findById(Integer bookId) {
-		Book book = null;
 
 		try {
-			Optional<Book> findById = bookRepository.findById(bookId);
-			book = findById.get();
+			Optional<Book> bookOptional = bookRepository.findById(bookId);
+			Book book = bookOptional.get();
 			log.info(Message.found);
 			return new ResponseEntity<GeneralResponse>(new GeneralResponse(book, Message.found, 200), HttpStatus.OK);
 		} catch (Exception e) {
 
 			log.error(e.getMessage());
-			return new ResponseEntity<GeneralResponse>(new GeneralResponse(book, Message.idNotFound, 404),
+			return new ResponseEntity<GeneralResponse>(new GeneralResponse(null, Message.idNotFound, 404),
 					HttpStatus.NOT_FOUND);
 		}
 	}
@@ -57,13 +56,13 @@ public class BookServiceImpl implements BookService {
 		try {
 			Pageable p = PageRequest.of(Integer.parseInt(paginationRequest.getPageNumber()),
 					Integer.parseInt(paginationRequest.getPageSize()), Sort.by(paginationRequest.getSortBy()));
-			Page<Book> pageBook = bookRepository.findAll(p);
-			List<Book> listBook = pageBook.getContent();
-			PaginationResponse paginationResponse = new PaginationResponse(pageBook.getNumber(), pageBook.getSize(),
-					pageBook.getTotalPages(), pageBook.getTotalElements(), pageBook.isLast(), pageBook.isFirst());
+			Page<Book> bookPage = bookRepository.findAll(p);
+			List<Book> bookList = bookPage.getContent();
+			PaginationResponse paginationResponse = new PaginationResponse(bookPage.getNumber(), bookPage.getSize(),
+					bookPage.getTotalPages(), bookPage.getTotalElements(), bookPage.isLast(), bookPage.isFirst());
 			log.info(Message.found);
 			return ResponseEntity
-					.of(Optional.of(new GeneralResponse(listBook, Message.found, 200, paginationResponse)));
+					.of(Optional.of(new GeneralResponse(bookList, Message.found, 200, paginationResponse)));
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			return new ResponseEntity<GeneralResponse>(new GeneralResponse(null, Message.notfound, 404),
@@ -75,18 +74,20 @@ public class BookServiceImpl implements BookService {
 	@Override
 	public ResponseEntity<GeneralResponse> update(BookRequest bookRequest) {
 
-		User user = null;
-		Book save = null;
 		try {
-			user = userRepository.findById(Integer.parseInt(bookRequest.getUserId())).get();
+			if (!userRepository.existsById(Integer.parseInt(bookRequest.getUserId()))) {
+				return new ResponseEntity<GeneralResponse>(new GeneralResponse(null, Message.userIdNotFound, 200),
+						HttpStatus.NOT_FOUND);
+			}
+			User user = userRepository.findById(Integer.parseInt(bookRequest.getUserId())).get();
 			Book book = new Book(bookRequest.getBookName(), Integer.parseInt(bookRequest.getPrice()), user,
 					bookRequest.getBookId());
-			save = bookRepository.save(book);
+			book = bookRepository.save(book);
 			log.info(Message.update);
-			return new ResponseEntity<GeneralResponse>(new GeneralResponse(save, Message.update, 200), HttpStatus.OK);
+			return new ResponseEntity<GeneralResponse>(new GeneralResponse(book, Message.update, 200), HttpStatus.OK);
 		} catch (Exception e) {
 			log.error(e.getMessage());
-			return new ResponseEntity<GeneralResponse>(new GeneralResponse(save, Message.notUpdate, 500),
+			return new ResponseEntity<GeneralResponse>(new GeneralResponse(null, Message.notUpdate, 500),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -107,34 +108,33 @@ public class BookServiceImpl implements BookService {
 
 	@Override
 	public ResponseEntity<GeneralResponse> getByBookIdAndBookname(Integer bookid, String bookname) {
-		Book book = null;
+
 		try {
-			Optional<Book> findById = bookRepository.getByBookIdAndBookname(bookid, bookname);
-			book = findById.get();
+			Optional<Book> bookOptional = bookRepository.getByBookIdAndBookname(bookid, bookname);
+			Book book = bookOptional.get();
 			log.info(Message.found);
 			return new ResponseEntity<GeneralResponse>(new GeneralResponse(book, Message.found, 200), HttpStatus.OK);
 
 		} catch (Exception e) {
 			log.error(e.getMessage());
-			return new ResponseEntity<GeneralResponse>(new GeneralResponse(book, Message.notfound, 404),
+			return new ResponseEntity<GeneralResponse>(new GeneralResponse(null, Message.notfound, 404),
 					HttpStatus.NOT_FOUND);
 		}
 	}
 
 	@Override
 	public ResponseEntity<GeneralResponse> save(BookRequest bookRequest) {
-		Book save = null;
 		try {
 			User user = userRepository.findById(Integer.parseInt(bookRequest.getUserId())).get();
 
 			Book book = new Book(bookRequest.getBookName(), Integer.parseInt(bookRequest.getPrice()), user);
-			save = bookRepository.save(book);
+			book = bookRepository.save(book);
 			log.info(Message.save);
-			return new ResponseEntity<GeneralResponse>(new GeneralResponse(save, Message.save, 200), HttpStatus.OK);
+			return new ResponseEntity<GeneralResponse>(new GeneralResponse(book, Message.save, 200), HttpStatus.OK);
 
 		} catch (Exception e) {
 			log.error(e.getMessage());
-			return new ResponseEntity<GeneralResponse>(new GeneralResponse(save, Message.notSave, 500),
+			return new ResponseEntity<GeneralResponse>(new GeneralResponse(null, Message.notSave, 500),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
